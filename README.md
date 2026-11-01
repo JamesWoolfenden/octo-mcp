@@ -85,3 +85,13 @@ go test ./...
 ```
 
 Tests never touch the network. The API is faked with an in-process `httptest` server serving fixture responses (`testdata/`), and all identifiers in the fixtures are fake.
+
+### Keeping secrets out of the repo
+
+Your API key and account number come from environment variables and must never be committed. After cloning, install the [pre-commit](https://pre-commit.com) hooks, which run gitleaks, a private-key check, `go vet` and `go test` before every commit:
+
+```sh
+pre-commit install
+```
+
+The same gitleaks scan runs in CI on every push and pull request (`.github/workflows/gitleaks.yml`), so a commit that skips the local hook is still caught. `.env` files, keys and local MCP config are in `.gitignore`.
