@@ -68,6 +68,8 @@ Add to `claude_desktop_config.json`:
 - "Check all my meters for missing readings over the last 30 days."
 - "Is my gas meter reporting? When was the last reading?"
 
+If you have solar and a battery, pair this with [foxess-mcp](https://github.com/JamesWoolfenden/foxess-mcp) and its [`solar-savings` skill](https://github.com/JamesWoolfenden/foxess-mcp/tree/master/skills/solar-savings). Together they estimate what your system saves, because the grid meters alone can't see the solar you use yourself.
+
 ## Behaviour worth knowing
 
 - **Gas units.** SMETS2 gas meters (serial starting `E6S`) report cubic metres. These are converted with `m³ × 1.02264 × 39.5 ÷ 3.6` and the result notes the conversion. Other meters are assumed to report kWh. Override with `gas_unit` (`m3` or `kwh`) if the guess is wrong.
