@@ -8,13 +8,26 @@ on:
 permissions:
   contents: read
 
+env:
+  GITLEAKS_VERSION: 8.24.3
+  # sha256 of gitleaks_8.24.3_linux_x64.tar.gz, from the release's checksums file
+  GITLEAKS_SHA256: 9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c
+
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # scan full history, not just the tip
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # the whole history, not just the tip
+      - name: Install gitleaks (checksum verified)
+        run: |
+          f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$f" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$f"
+          echo "${GITLEAKS_SHA256}  $f" | sha256sum -c -
+          tar xzf "$f" gitleaks
+      # Scans every commit in the repo. The gitleaks action instead builds a
+      # commit range from the push event, which fails on a new repo's first push
+      # and silently scans nothing.
+      - name: Scan full history
+        run: ./gitleaks git --redact -v --no-banner --exit-code 2 .
