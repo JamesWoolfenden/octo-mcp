@@ -332,6 +332,26 @@ func TestGetCosts(t *testing.T) {
 	}
 }
 
+// A meter that reports zero kWh in every slot (e.g. export overnight) used to
+// give a 0/0 band average, and the NaN made the JSON encoding fail.
+func TestGetCostsZeroEnergyBandEncodes(t *testing.T) {
+	f := newFakeAPI(t)
+	f.perSlot[expMPAN] = 0
+	s := f.service(t, at("2026-11-02T12:00:00Z"))
+	out, err := s.GetCosts(context.Background(), "export", "2026-10-26", "2026-11-01", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := json.Marshal(out); err != nil {
+		t.Fatalf("result must be JSON-encodable: %v", err)
+	}
+	for _, b := range out.Export.Bands {
+		if b.AvgP != 0 {
+			t.Errorf("band %s average = %v, want 0 for no energy", b.Band, b.AvgP)
+		}
+	}
+}
+
 func TestGetCostsMissingReadingsIsPartial(t *testing.T) {
 	f := newFakeAPI(t)
 	f.drop[impMPAN] = func(t time.Time) bool { return t.Day() == 28 } // lose a whole day

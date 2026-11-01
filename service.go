@@ -151,6 +151,15 @@ func round(v float64, dp int) float64 {
 
 func pounds(pence float64) float64 { return math.Round(pence) / 100 }
 
+// avgPence is pence per kWh, or 0 when there is no energy: 0/0 would be NaN,
+// which encoding/json refuses to encode.
+func avgPence(pence, kwh float64) float64 {
+	if kwh <= 0 {
+		return 0
+	}
+	return round(pence/kwh, 2)
+}
+
 // ---------------------------------------------------------------- readings
 
 // gasInM3 decides whether gas readings are cubic metres. SMETS2 gas serials
@@ -558,7 +567,7 @@ func (s *Service) side(ctx context.Context, m meter, start, end time.Time, gasUn
 	}
 	for _, name := range []string{"off-peak", "day", "peak", "all"} {
 		if b := bands[name]; b != nil {
-			so.Bands = append(so.Bands, BandOut{Band: name, KWh: round(b.KWh, 3), Pounds: pounds(b.Pence), AvgP: round(b.Pence/b.KWh, 2)})
+			so.Bands = append(so.Bands, BandOut{Band: name, KWh: round(b.KWh, 3), Pounds: pounds(b.Pence), AvgP: avgPence(b.Pence, b.KWh)})
 		}
 	}
 	so.KWh = round(so.KWh, 3)
