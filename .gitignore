@@ -1,0 +1,4 @@
+octo-mcp
+octo-mcp.exe
+*.test
+.env
