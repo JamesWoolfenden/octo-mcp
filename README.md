@@ -97,3 +97,7 @@ pre-commit install
 ```
 
 The same gitleaks scan runs in CI on every push and pull request (`.github/workflows/gitleaks.yml`), so a commit that skips the local hook is still caught. `.env` files, keys and local MCP config are in `.gitignore`.
+
+## Licence
+
+[MIT](LICENSE)
