@@ -24,8 +24,10 @@ Dates are `YYYY-MM-DD` (UK local; a date-only end is inclusive of that whole day
 You need an API key from the Octopus dashboard: **Personal details → API access**, and your account number (`A-XXXXXXXX`).
 
 ```sh
-go build -o octo-mcp .
+make build   # or: go build -o octo-mcp .
 ```
+
+`make build` writes `octo-mcp` (`octo-mcp.exe` on Windows) into the repo folder. Use the full path to that file when registering it with Claude below. `make install` instead puts it in `$(go env GOPATH)/bin` (often on your `PATH`), so the registration can use plain `octo-mcp`. After rebuilding, reconnect the server with `/mcp` in Claude Code so it picks up the new binary.
 
 Configuration is by environment variable only:
 
@@ -83,7 +85,7 @@ If you have solar and a battery, pair this with [foxess-mcp](https://github.com/
 ## Development
 
 ```sh
-go test ./...
+make test   # or: go test ./...
 ```
 
 Tests never touch the network. The API is faked with an in-process `httptest` server serving fixture responses (`testdata/`), and all identifiers in the fixtures are fake.
@@ -93,7 +95,7 @@ Tests never touch the network. The API is faked with an in-process `httptest` se
 Your API key and account number come from environment variables and must never be committed. After cloning, install the [pre-commit](https://pre-commit.com) hooks, which run gitleaks, a private-key check, `go vet` and `go test` before every commit:
 
 ```sh
-pre-commit install
+make install-hooks   # or: pre-commit install
 ```
 
 The same gitleaks scan runs in CI on every push and pull request (`.github/workflows/gitleaks.yml`), so a commit that skips the local hook is still caught. `.env` files, keys and local MCP config are in `.gitignore`.
